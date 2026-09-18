@@ -1,3 +1,5 @@
+const prompt = require("prompt-sync")();
+
 //all terminal
 
 //chess table
@@ -11,12 +13,24 @@ let table = [{"A": 0, "B": 0, "C": 0, "D": 0, "E": 0, "F": 0, "G": 0, "H": 0},
              {"A": 0, "B": 0, "C": 0, "D": 0, "E": 0, "F": 0, "G": 0, "H": 0}];
 
 function showTable() {
+    console.clear()
     console.log("\tA B C D E F G H");
+    let chosse = true
     for (let i = 0; i < table.length; i++) {
         let row = table[i];
         let rowString = (i + 1) + "\t";
+        chosse = !chosse
+        let backcolor = {true:"\x1b[40m", false: "\x1b[47m"};
+        let color = {true: "\x1b[37m", false: "\x1b[30m"};
         for (let key in row) {
-            rowString += row[key] + " ";
+            if(row[key] == 0){
+                rowString += color[chosse] + backcolor[chosse] + row[key] + "\x1b[0m ";
+            }else if(row[key]  < 0){
+                rowString += "\x1b[31m" + backcolor[chosse] + (row[key] * -1) + "\x1b[0m ";
+            }else{
+                rowString += "\x1b[34m" + backcolor[chosse] + (row[key]) + "\x1b[0m ";
+            }
+            chosse = !chosse
         }
         console.log(rowString);
     }
@@ -60,5 +74,46 @@ function initializeTable() {
 
 }
 
+function move(jogador){
+    console.log('jogador ' + jogador + " sua vez de jogar")
+    let cL = parseInt(prompt("Linha:")) - 1
+    let cC = prompt("Coluna: ").toUpperCase()
+
+    if (table[cL][cC] != undefined){
+        let piece = table[cL][cC]
+        if (piece == 0){
+            console.log("nenhuma peça selecionada")
+            return move(jogador)
+        }
+
+        if ((piece < 0 & jogador < 0) || (piece > 0 & jogador > 0) ){
+            const pieces = {1: "piao", 2:"cavalo", 3:"bispo", 4:"torre", 5:"rainha", 6:"rei"}
+            console.log("peça selecionada: " + (piece > 0) ? pieces[piece] : pieces[piece * -1])
+            let nL = parseInt(prompt("Nova Linha: ")) - 1
+            let nC = prompt("Nova Coluna: ").toUpperCase()
+            if (table[nL][nC] != undefined){
+               if(!((piece < 0 & table[nL][nC] < 0) || (piece > 0 & table[nL][nC] > 0))){
+                table[cL][cC] = 0
+                table[nL][nC] = piece
+               }else{
+                console.log("há uma peça no lugar")
+                return move(jogador)
+               }
+            }else{
+                console.log("posição invalida")
+                return move(jogador)
+            }
+        }else{
+            console.log("Peça selecionada não é sua")
+            return move(jogador)
+        }
+    }else{
+        console.log("posição invalida")
+        return move(jogador)
+    }
+}
+
 initializeTable();
 showTable();
+move(1)
+showTable()
